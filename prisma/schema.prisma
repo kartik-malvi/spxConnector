@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Shop {
+  id                   String         @id @default(cuid())
+  shoplineShopId       String         @unique
+  domain               String         @unique
+  accessToken          String
+  scope                String?
+  spxApiBaseUrl        String?
+  spxClientId          String?
+  spxClientSecret      String?
+  spxAccessToken       String?
+  spxRefreshToken      String?
+  spxMerchantCode      String?
+  installedAt          DateTime       @default(now())
+  uninstalledAt        DateTime?
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+  orderSyncs           OrderSync[]
+  webhookDeliveries    WebhookDelivery[]
+}
+
+model WebhookDelivery {
+  id             String   @id @default(cuid())
+  shopId         String
+  topic          String
+  deliveryId     String
+  payloadHash    String
+  payload        Json
+  processedAt    DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  shop           Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@unique([shopId, deliveryId])
+}
+
+model OrderSync {
+  id                      String   @id @default(cuid())
+  shopId                  String
+  shoplineOrderId         String
+  shoplineOrderNumber     String?
+  webhookDeliveryId       String?
+  status                  String   @default("pending")
+  spxOrderReference       String?
+  spxTrackingNumber       String?
+  lastError               String?
+  requestPayload          Json?
+  responsePayload         Json?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  shop                    Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@unique([shopId, shoplineOrderId])
+}

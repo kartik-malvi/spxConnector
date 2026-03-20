@@ -1,0 +1,102 @@
+services:
+  - type: web
+    name: spxconnector-app
+    runtime: node
+    plan: starter
+    autoDeploy: true
+    buildCommand: npm install && npm run build
+    preDeployCommand: npx prisma migrate deploy
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "10000"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: spxconnector-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: spxconnector-redis
+          type: keyvalue
+          property: connectionString
+      - key: APP_URL
+        sync: false
+      - key: SHOPLINE_REDIRECT_URI
+        sync: false
+      - key: SHOPLINE_APP_KEY
+        sync: false
+      - key: SHOPLINE_APP_SECRET
+        sync: false
+      - key: SHOPLINE_WEBHOOK_SECRET
+        sync: false
+      - key: SHOPLINE_APP_SCOPES
+        value: read_orders,write_orders
+      - key: SHOPLINE_API_BASE_URL
+        value: https://api.shopline.com
+      - key: SHOPLINE_ACCOUNTS_BASE_URL
+        value: https://accounts.shopline.com
+      - key: SPX_API_BASE_URL
+        value: https://partner.spx.sg
+      - key: SPX_CLIENT_ID
+        sync: false
+      - key: SPX_CLIENT_SECRET
+        sync: false
+      - key: SPX_MERCHANT_CODE
+        sync: false
+
+  - type: worker
+    name: spxconnector-worker
+    runtime: node
+    plan: starter
+    autoDeploy: true
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:worker
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: spxconnector-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: spxconnector-redis
+          type: keyvalue
+          property: connectionString
+      - key: APP_URL
+        sync: false
+      - key: SHOPLINE_REDIRECT_URI
+        sync: false
+      - key: SHOPLINE_APP_KEY
+        sync: false
+      - key: SHOPLINE_APP_SECRET
+        sync: false
+      - key: SHOPLINE_WEBHOOK_SECRET
+        sync: false
+      - key: SHOPLINE_APP_SCOPES
+        value: read_orders,write_orders
+      - key: SHOPLINE_API_BASE_URL
+        value: https://api.shopline.com
+      - key: SHOPLINE_ACCOUNTS_BASE_URL
+        value: https://accounts.shopline.com
+      - key: SPX_API_BASE_URL
+        value: https://partner.spx.sg
+      - key: SPX_CLIENT_ID
+        sync: false
+      - key: SPX_CLIENT_SECRET
+        sync: false
+      - key: SPX_MERCHANT_CODE
+        sync: false
+
+  - type: keyvalue
+    name: spxconnector-redis
+    plan: starter
+    maxmemoryPolicy: allkeys-lru
+    ipAllowList: []
+
+databases:
+  - name: spxconnector-db
+    plan: basic-1gb
