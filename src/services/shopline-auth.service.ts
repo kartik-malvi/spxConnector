@@ -71,6 +71,7 @@ export const shoplineAuthService = {
 
   getAuthorizeUrl(shop: string, state: string) {
     const url = new URL("/oauth/authorize", env.SHOPLINE_ACCOUNTS_BASE_URL);
+    url.searchParams.set("response_type", "code");
     url.searchParams.set("client_id", env.SHOPLINE_APP_KEY);
     url.searchParams.set("scope", env.SHOPLINE_APP_SCOPES);
     url.searchParams.set("redirect_uri", env.SHOPLINE_REDIRECT_URI);
